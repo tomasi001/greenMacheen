@@ -7,7 +7,7 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Lotty from "~/components/Lotty";
 import VoiceInput from "~/components/VoiceInput";
 
@@ -18,9 +18,17 @@ const buttonsText = [
   "Closest Hospital",
 ];
 
-export default function chatPage() {
+export default function ChatPage() {
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState("");
+
+  const textAreaRef = useRef()
+
+  useEffect(()=>{
+    const textarea = textAreaRef.current
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }, [response])
 
   return (
     <Center h="100vh" bg="##F6FEFD">
@@ -72,6 +80,7 @@ export default function chatPage() {
             })}
           </Grid>
           <Textarea
+            ref={textAreaRef}
             placeholder="You can speak or type to talk to Ozzy..."
             shadow="lg"
             bg="white"
