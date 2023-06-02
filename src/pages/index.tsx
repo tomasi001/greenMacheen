@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./index.module.css";
 
 import { Spinner } from "@chakra-ui/react";
+import VoiceInput from "~/compponents/voice-input";
 const Home: NextPage = () => {
   return (
     <>
