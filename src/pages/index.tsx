@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { api } from "~/utils/api";
 import { Spinner } from "@chakra-ui/react";
+import VoiceInput from "~/compponents/voice-input";
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
@@ -18,6 +19,9 @@ const Home: NextPage = () => {
         <div className={styles.container}>
           <p>Chakra ui works</p>
           <Spinner />
+
+
+          <VoiceInput/>
         </div>
       </main>
     </>
