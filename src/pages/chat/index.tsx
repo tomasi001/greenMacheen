@@ -33,7 +33,6 @@ export default function chatPage() {
         p={[4, 50]}
         paddingBottom="5vh"
         position="relative"
-        zIndex={-1}
       >
         <VStack
           alignContent="center"
@@ -70,6 +69,7 @@ export default function chatPage() {
           <Input
             placeholder="You can speak or type to talk to Ozzy..."
             shadow="lg"
+            bg="white"
           />
         </VStack>
         <Center>
