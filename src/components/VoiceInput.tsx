@@ -38,7 +38,7 @@ const VoiceInput = () => {
           onClick={SpeechRecognition.startListening as any}
         >
           <i className="ri-mic-2-fill"></i>
-          Task to Ozzi
+          Ask to Ozzi
         </Button>
 
         <Button
