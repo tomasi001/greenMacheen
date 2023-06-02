@@ -2,21 +2,22 @@ name: CI
 
 on: [push, pull-request]
 
-env: 
-  DATABASE_URL: 'https://dummyURL'
+env:
+  DATABASE_URL: "https://dummyURL"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps: 
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      -name: Install Dependencies
-        uses: npm install
+      - name: Install Dependencies
+        run: npm install
 
-      -name: Type Check
-        uses: npm run typecheck
+      - name: Type Check
+        run: npm run typecheck
 
-      -name: Lint
-        uses: npm run lint
+      - name: Lint
+        run: npm run lint
