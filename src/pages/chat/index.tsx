@@ -19,11 +19,9 @@ export default function chatPage() {
   return (
     <Center h="100vh" bg="##F6FEFD">
       <Box
-        w="90%"
+        w={["90%", "80%"]}
         bg="#FFFCF5"
         shadow="xl"
-        border="1px"
-        borderColor="black"
         rounded="xl"
         p={[4, 50]}
         paddingBottom="5vh"
@@ -57,7 +55,6 @@ export default function chatPage() {
           <Input
             placeholder="You can speak or type to talk to Ozzy..."
             shadow="lg"
-            borderColor="black"
           />
           
         </VStack>
