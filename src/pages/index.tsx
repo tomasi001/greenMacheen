@@ -19,7 +19,13 @@ const Home: NextPage = () => {
           <UserButton afterSignOutUrl="/" />
         </Flex>
 
-        <Flex alignItems="center" flexDir="column" width="100vw" height="100vh">
+        <Flex
+          alignItems="center"
+          flexDir="column"
+          width="100vw"
+          height="100vh"
+          bg="aqua"
+        >
           <Heading pt="20vh" size="4xl">
             Ozzy
           </Heading>
