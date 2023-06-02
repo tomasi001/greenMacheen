@@ -1,5 +1,5 @@
-import { Flex, ResponsiveValue } from "@chakra-ui/react";
-import * as CSS from "csstype";
+import { Flex, type ResponsiveValue } from "@chakra-ui/react";
+import type * as CSS from "csstype";
 import Lottie from "lottie-react";
 import OzzyAnimation from "../animations/ozzy.json";
 

@@ -1,4 +1,4 @@
-import { Box, Button, Center, Flex, Grid, Heading, Input, VStack, Text, HStack } from "@chakra-ui/react";
+import { Box, Button, Center, HStack, Text, VStack } from "@chakra-ui/react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -20,34 +20,35 @@ const Home: NextPage = () => {
             position="absolute"
             transform="scale(0.3)"
           />
-        <Box
-          w={["90%", "30%"]}
-          bg="#FFFCF5"
-          shadow="xl"
-          rounded="xl"
-        >
-          <VStack paddingY={"3vh"} spacing={10}>
-            <Heading size="3xl">Ozzy</Heading>
-            <HStack
-              spacing={5}
-            >
-            <Link href="/sign-in">
-              <Button bg="#F79009" shadow="xl">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button bg="#F79009" shadow="xl">
-                Sign Up
-              </Button>
-            </Link>
-            
-          </HStack>
-          </VStack>
-          
-        </Box>
-      </Center>
-    </main>
+          <Box w={["90%", "30%"]} bg="#FFFCF5" shadow="xl" rounded="xl">
+            <VStack paddingY={"3vh"} spacing={10}>
+              <Text fontSize="50px">
+                <Text fontWeight="bold" as="span">
+                  Ozzy{" "}
+                </Text>
+                <Text as="span" color="orange">
+                  /
+                </Text>{" "}
+                <Text fontWeight="thin" as="span">
+                  Assist
+                </Text>
+              </Text>
+              <HStack spacing={5}>
+                <Link href="/sign-in">
+                  <Button color="white" bg="#F79009" shadow="xl">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button color="white" bg="#F79009" shadow="xl">
+                    Sign Up
+                  </Button>
+                </Link>
+              </HStack>
+            </VStack>
+          </Box>
+        </Center>
+      </main>
     </>
   );
 };

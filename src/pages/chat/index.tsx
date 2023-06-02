@@ -18,7 +18,7 @@ const buttonsText = [
   "Closest Hospital",
 ];
 
-export default function chatPage() {
+export default function ChatPage() {
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState("");
 
@@ -78,6 +78,7 @@ export default function chatPage() {
             value={
               (response && (response as any)?.data?.completion) || transcript
             }
+            readOnly={true}
           />
         </VStack>
         <Center>

@@ -1,5 +1,5 @@
 import { Button } from "@chakra-ui/react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -12,12 +12,7 @@ type VoiceInputProps = {
 
 const VoiceInput = ({ setResponse, setTranscript }: VoiceInputProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { transcript, listening, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
-
-  if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
-  }
+  const { transcript, listening } = useSpeechRecognition();
 
   const fetchResponse = async () => {
     setIsLoading(true);
@@ -54,6 +49,7 @@ const VoiceInput = ({ setResponse, setTranscript }: VoiceInputProps) => {
         SpeechRecognition.startListening();
       }}
       isLoading={isLoading}
+      // isDisabled={!browserSupportsSpeechRecognition}
     >
       <i className="ri-mic-line"></i>
     </Button>
