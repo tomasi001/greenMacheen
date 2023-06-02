@@ -1,15 +1,27 @@
+import { ChakraProvider, Flex } from "@chakra-ui/react";
+import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { type AppType } from "next/app";
-import { api } from "~/utils/api";
+import "regenerator-runtime/runtime";
+import "~/styles/font.css";
 import "~/styles/globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-
-// pages/_app.js
-import { ChakraProvider } from "@chakra-ui/react";
+import { theme } from "~/theme";
+import { api } from "~/utils/api";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <ClerkProvider {...pageProps}>
-      <ChakraProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#F79009",
+          colorBackground: "#FFFCF5",
+        },
+      }}
+      {...pageProps}
+    >
+      <ChakraProvider theme={theme}>
+        <Flex justifyContent="flex-end" p="8px">
+          <UserButton afterSignOutUrl="/" />
+        </Flex>
         <Component {...pageProps} />
       </ChakraProvider>
     </ClerkProvider>
