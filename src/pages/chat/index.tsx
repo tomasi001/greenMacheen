@@ -43,7 +43,7 @@ export default function ChatPage() {
 
   const sendPrompt = async () => {
     setPromptArray([...promptArray, prompt])
-    let final_prompt = prompt + ". Less than 200 characters."
+    let final_prompt = prompt + ". Less than 200 characters and do not include Here is a character response in your answer."
     setPrompt("")
     const result = await completeClaudRequest(final_prompt);
     //setResponse(result.data.completion.replace(/• /g, "\n"))
