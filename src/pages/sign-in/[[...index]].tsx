@@ -13,7 +13,7 @@ export default function Page() {
     >
       <Flex pt="30vh">
         <Lotty
-          bottom="160px"
+          bottom="185px"
           right="70px"
           position="absolute"
           transform="scale(0.3)"

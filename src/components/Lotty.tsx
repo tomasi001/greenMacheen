@@ -19,6 +19,7 @@ const Lotty = ({ bottom, right, position, transform }: LottyProps) => {
       right={right}
       position={position}
       transform={transform}
+      zIndex={2}
     >
       <Lottie animationData={OzzyAnimation} loop={true} />
     </Flex>
