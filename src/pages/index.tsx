@@ -4,6 +4,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { Button, Flex, Heading } from "@chakra-ui/react";
 
+// import { Spinner } from "@chakra-ui/react";
+// import VoiceInput from "~/compponents/voice-input";
 const Home: NextPage = () => {
   return (
     <>
