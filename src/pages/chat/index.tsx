@@ -85,6 +85,7 @@ export default function chatPage() {
             fontSize="28px"
             marginTop={["10vh", "12vh"]}
             shadow="xl"
+            textColor="white"
           >
             <i className="ri-mic-line"></i>
           </Button>
