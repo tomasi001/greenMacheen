@@ -3,10 +3,11 @@ import {
   Button,
   Center,
   Grid,
-  Input,
   Text,
+  Textarea,
   VStack,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import Lotty from "~/components/Lotty";
 
 const buttonsText = [
@@ -17,6 +18,8 @@ const buttonsText = [
 ];
 
 export default function chatPage() {
+  const [response, setResponse] = useState();
+  
   return (
     <Center h="100vh" bg="##F6FEFD">
         <Lotty
@@ -66,10 +69,11 @@ export default function chatPage() {
               );
             })}
           </Grid>
-          <Input
+          <Textarea
             placeholder="You can speak or type to talk to Ozzy..."
             shadow="lg"
             bg="white"
+            value={response && (response as any)?.data?.completion}
           />
         </VStack>
         <Center>
@@ -89,6 +93,8 @@ export default function chatPage() {
           >
             <i className="ri-mic-line"></i>
           </Button>
+          {/* TODO: use the below component */}
+          {/* <VoiceInput setResponse={setResponse}/> */}
         </Center>
       </Box>
     </Center>

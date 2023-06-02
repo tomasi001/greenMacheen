@@ -1,12 +1,15 @@
 import { Button, Stack, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { ClaudeService } from "~/@core/services/claude/cloude-service";
 
-const VoiceInput = () => {
-  const [response, setResponse] = useState();
+type VoiceInputProps = {
+  setResponse: Dispatch<SetStateAction<undefined>>
+}
+
+const VoiceInput = ({setResponse}: VoiceInputProps) => {
   const {
     transcript,
     listening,
@@ -20,7 +23,7 @@ const VoiceInput = () => {
 
   const fetchResponse = async () => {
     const result = await completeClaudRequest(transcript);
-    setResponse(result);
+    setResponse && setResponse(result);
   };
 
   useEffect(() => {
@@ -30,8 +33,9 @@ const VoiceInput = () => {
   }, [transcript]);
 
   return (
-    <div>
-      <Stack direction="row" spacing={4}>
+    <>
+    {/* TODO: remove at later stage */}
+      {/* <Stack direction="row" spacing={4}>
         <Button
           colorScheme="teal"
           variant="solid"
@@ -52,11 +56,28 @@ const VoiceInput = () => {
         <Button colorScheme="teal" variant="outline" onClick={resetTranscript}>
           Reset Transcript
         </Button>
-      </Stack>
+      </Stack> */}
+      <Button
+        bg="#F79009"
+        size="lg"
+        variant="solid"
+        borderRadius="full"
+        position="absolute"
+        zIndex="1"
+        height="60px"
+        width="60px"
+        fontSize="28px"
+        marginTop={["10vh", "12vh"]}
+        shadow="xl"
+        textColor="white"
+        onClick={SpeechRecognition.startListening as any}
+      >
+        <i className="ri-mic-line"></i>
+      </Button>
       <p>{transcript}</p>
 
-      {response && <Text>{(response as any)?.data?.completion}</Text>}
-    </div>
+      
+    </>
   );
 };
 
