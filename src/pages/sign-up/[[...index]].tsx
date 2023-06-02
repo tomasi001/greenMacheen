@@ -1,11 +1,26 @@
 import { Flex } from "@chakra-ui/react";
 import { SignUp } from "@clerk/nextjs";
+import Lotty from "~/components/Lotty";
 
 export default function Page() {
   return (
-    <Flex alignItems="center" flexDir="column" width="100vw" height="100vh">
-      <Flex justifyContent="space-between" pt="10vh">
-        <SignUp />
+    <Flex
+      alignItems="center"
+      justifyContent="space-between"
+      flexDir="column"
+      width="100vw"
+      height="100vh"
+    >
+      <Flex pt="30vh">
+        <Lotty
+          bottom="185px"
+          right="70px"
+          position="absolute"
+          transform="scale(0.3)"
+        />
+        <Flex>
+          <SignUp />
+        </Flex>
       </Flex>
     </Flex>
   );
