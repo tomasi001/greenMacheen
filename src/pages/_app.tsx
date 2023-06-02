@@ -1,6 +1,7 @@
 import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
+import 'regenerator-runtime/runtime'
 import { ClerkProvider } from "@clerk/nextjs";
 import '~/styles/font.css'
 
