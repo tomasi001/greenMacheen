@@ -17,7 +17,6 @@ const Home: NextPage = () => {
       </Head>
       <main className={styles.main}>
         <div className={styles.container}>
-          <VoiceInput/>
         </div>
       </main>
     </>
