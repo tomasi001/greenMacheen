@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import Lotty from "~/components/Lotty";
+import VoiceInput from "~/components/VoiceInput";
 
 const buttonsText = [
   "Emergency Help",
@@ -94,7 +95,7 @@ export default function chatPage() {
             <i className="ri-mic-line"></i>
           </Button>
           {/* TODO: use the below component */}
-          {/* <VoiceInput setResponse={setResponse}/> */}
+          <VoiceInput setResponse={setResponse}/>
         </Center>
       </Box>
     </Center>
