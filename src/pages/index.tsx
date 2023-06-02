@@ -16,7 +16,9 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.container}></div>
+        <div className={styles.container}>
+          <VoiceInput/>
+        </div>
       </main>
     </>
   );
