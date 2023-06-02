@@ -22,22 +22,25 @@ export default function ChatPage() {
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState("");
 
-  const textAreaRef = useRef()
+  const textAreaRef = useRef();
 
-  useEffect(()=>{
-    const textarea = textAreaRef.current
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight}px`
-  }, [response])
+  useEffect(() => {
+    const textarea = textAreaRef.current;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [response]);
 
   return (
     <Center h="100vh" bg="##F6FEFD">
-      <Lotty
-        bottom="185px"
-        right="70px"
-        position="absolute"
-        transform="scale(0.3)"
-      />
+      {!response && (
+        <Lotty
+          bottom="185px"
+          right="70px"
+          position="absolute"
+          transform="scale(0.3)"
+        />
+      )}
+
       <Box
         w={["90%", "80%"]}
         bg="#FFFCF5"
