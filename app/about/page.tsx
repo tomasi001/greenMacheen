@@ -1,7 +1,9 @@
+"use client";
+import { Button, Flex } from "@chakra-ui/react";
 import React from "react";
 
 const page = () => {
-  return <div>page</div>;
+  return <Flex>Chat Page</Flex>;
 };
 
 export default page;
