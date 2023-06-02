@@ -3,32 +3,63 @@ import {
   Button,
   Center,
   Grid,
+  HStack,
+  Input,
+  SimpleGrid,
   Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction  } from "react";
 import Lotty from "~/components/Lotty";
-import VoiceInput from "~/components/VoiceInput";
 
-const buttonsText = [
-  "Emergency Help",
-  "Am I having a panic attack ?",
-  "How do I do CPR",
-  "Closest Hospital",
-];
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
+import { ClaudeService } from "~/@core/services/claude/cloude-service";
+
 
 export default function ChatPage() {
   const [response, setResponse] = useState("");
-  const [transcript, setTranscript] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [promptArray, setPromptArray] = useState([])
+  const [responseArray, setResponseArray] = useState([])
 
-  const textAreaRef = useRef()
+  let messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
 
-  useEffect(()=>{
-    const textarea = textAreaRef.current
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight}px`
-  }, [response])
+  const [isLoading, setIsLoading] = useState(false);
+  const { transcript, listening } = useSpeechRecognition();
+
+  const fetchResponse = async () => {
+    setIsLoading(true);
+    const result = await completeClaudRequest(transcript);
+    setResponse(result);
+    setIsLoading(false);
+  };
+
+  const handleInput = (event) =>{
+    setPrompt(event.target.value)
+  }
+
+  const sendPrompt = async () => {
+    setPromptArray([...promptArray, prompt])
+    let final_prompt = prompt + ". Less than 200 characters."
+    setPrompt("")
+    const result = await completeClaudRequest(final_prompt);
+    //setResponse(result.data.completion.replace(/• /g, "\n"))
+    setResponseArray([...responseArray, result.data.completion.replace(/• /g, "\n")])
+    messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
+  }
+
+  useEffect(() => {
+    if (!listening && transcript) {
+      fetchResponse();
+    }
+  }, [transcript, listening]);
+
+  useEffect(() => {
+    setPrompt(transcript);
+  }, [transcript]);
 
   return (
     <Center h="100vh" bg="##F6FEFD">
@@ -56,44 +87,73 @@ export default function ChatPage() {
           <Text as="b" fontSize="3xl" textAlign="center">
             Hi there! Get started by chatting to Ozzy
           </Text>
-          <Text textAlign="center">
-            Or select one of the options for immediate assistance.
-          </Text>
-          <Grid
-            templateColumns={["repeat(2, 1fr)", "repeat(4, 1fr)"]}
-            gap={[3, 5]}
-          >
-            {buttonsText.map((text, index) => {
-              return (
-                <Button
-                  key={index}
-                  whiteSpace="normal"
-                  bg="#F79009"
-                  textColor="white"
-                  shadow="lg"
-                  padding={3}
-                  height="auto"
-                >
-                  {text}
-                </Button>
-              );
-            })}
-          </Grid>
-          <Textarea
-            ref={textAreaRef}
-            placeholder="You can speak or type to talk to Ozzy..."
-            shadow="lg"
-            bg="white"
-            value={
-              (response && (response as any)?.data?.completion) || transcript
-            }
-            readOnly={true}
-          />
+          <Button bg="#F79009">Emergancy</Button>
+          <Box bg="white" border="1px" minW="100%" padding={3}>
+            <SimpleGrid spacing={3}>
+                {
+                    messageArray.map((message, index)=>(
+                      <Box key={index} textAlign={index % 2 ? "left" : "right"}>{message}</Box>
+                    ))
+                }
+            </SimpleGrid>
+            
+          </Box>
+          <VStack>
+            
+          </VStack>
+          <HStack>
+              
+            <Input placeholder="You can speak or type to talk to Ozzy..." bg="white" width="50vh" shadow="xl" onChange={handleInput} value={prompt}/>
+            <Button bg="#F79009" size="md" variant="solid"
+                borderRadius="full"
+                height="45px"
+                width="45px"
+                fontSize="23px"
+                shadow="xl"
+                textColor="white"
+                onClick={sendPrompt}
+              >
+              <i className="ri-send-plane-2-line"></i>
+            </Button>
+              <Button bg="#F79009" size="md" variant="solid"
+                borderRadius="full"
+                height="45px"
+                width="45px"
+                fontSize="23px"
+                shadow="xl"
+                textColor="white"
+                onClick={() => {
+                  setResponse("");
+                  SpeechRecognition.startListening();
+                }}
+                isLoading={isLoading}
+              >
+              <i className="ri-mic-line"></i>
+            </Button>
+          </HStack>
         </VStack>
         <Center>
-          <VoiceInput setResponse={setResponse} setTranscript={setTranscript} />
+          
         </Center>
       </Box>
     </Center>
   );
+}
+
+async function completeClaudRequest(transcript: any) {
+  const claude = new ClaudeService();
+
+  try {
+    const res = await claude.complete({
+      prompt: `\n\nHuman: ${transcript} ?\n\nAssistant: `,
+      model: "claude-v1",
+      max_tokens_to_sample: 300,
+      stop_sequences: ["\n\nHuman:"],
+    });
+
+    console.log("res", res);
+    return res as any;
+  } catch (error) {
+    console.log("completeClaudRequest >> error ", error);
+  }
 }
