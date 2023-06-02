@@ -7,6 +7,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import Lotty from "~/components/Lotty";
 
 const buttonsText = [
   "Emergency Help",
@@ -18,6 +19,12 @@ const buttonsText = [
 export default function chatPage() {
   return (
     <Center h="100vh" bg="##F6FEFD">
+        <Lotty
+          bottom="185px"
+          right="70px"
+          position="absolute"
+          transform="scale(0.3)"
+        />
       <Box
         w={["90%", "80%"]}
         bg="#FFFCF5"
@@ -26,6 +33,7 @@ export default function chatPage() {
         p={[4, 50]}
         paddingBottom="5vh"
         position="relative"
+        zIndex={-1}
       >
         <VStack
           alignContent="center"
