@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import Lotty from "~/components/Lotty";
+import VoiceInput from "~/components/VoiceInput";
 
 const buttonsText = [
   "Emergency Help",
@@ -18,16 +19,17 @@ const buttonsText = [
 ];
 
 export default function chatPage() {
-  const [response, setResponse] = useState();
-  
+  const [response, setResponse] = useState("");
+  const [transcript, setTranscript] = useState("");
+
   return (
     <Center h="100vh" bg="##F6FEFD">
-        <Lotty
-          bottom="185px"
-          right="70px"
-          position="absolute"
-          transform="scale(0.3)"
-        />
+      <Lotty
+        bottom="185px"
+        right="70px"
+        position="absolute"
+        transform="scale(0.3)"
+      />
       <Box
         w={["90%", "80%"]}
         bg="#FFFCF5"
@@ -73,28 +75,13 @@ export default function chatPage() {
             placeholder="You can speak or type to talk to Ozzy..."
             shadow="lg"
             bg="white"
-            value={response && (response as any)?.data?.completion}
+            value={
+              (response && (response as any)?.data?.completion) || transcript
+            }
           />
         </VStack>
         <Center>
-          <Button
-            bg="#F79009"
-            size="lg"
-            variant="solid"
-            borderRadius="full"
-            position="absolute"
-            zIndex="1"
-            height="60px"
-            width="60px"
-            fontSize="28px"
-            marginTop={["10vh", "12vh"]}
-            shadow="xl"
-            textColor="white"
-          >
-            <i className="ri-mic-line"></i>
-          </Button>
-          {/* TODO: use the below component */}
-          {/* <VoiceInput setResponse={setResponse}/> */}
+          <VoiceInput setResponse={setResponse} setTranscript={setTranscript} />
         </Center>
       </Box>
     </Center>
