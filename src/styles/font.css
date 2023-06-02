@@ -1,0 +1,15 @@
+/* Regular */
+@font-face{
+    font-family: 'Outfit';
+    src: url('../../assets/font/Outfit-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face{
+    font-family: 'Outfit';
+    src: url('../../assets/font/Outfit-Bold.ttf');
+    font-weight: bold;
+    font-style: normal;
+}
