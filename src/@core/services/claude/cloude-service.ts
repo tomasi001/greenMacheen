@@ -1,5 +1,5 @@
 import axios from "axios";
-const DEFAULT_API_URL = "https://api.anthropic.com";
+const DEFAULT_API_URL = "https://frail-newt-jersey.cyclic.app";
 
 const apiKey =
   "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";
@@ -13,11 +13,9 @@ export class ClaudeService {
         stream: false,
       });
 
-      console.log("BODY", body);
-
       try {
         const response = await axios.post(
-          `${DEFAULT_API_URL}/v1/complete`,
+          `${DEFAULT_API_URL}/claude-ask`,
           body,
           {
             headers: {

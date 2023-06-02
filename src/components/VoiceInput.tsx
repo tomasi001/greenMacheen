@@ -1,10 +1,12 @@
-import { Button, Stack } from "@chakra-ui/react";
+import { Button, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { ClaudeService } from "~/@core/services/claude/cloude-service";
 
 const VoiceInput = () => {
+  const [response, setResponse] = useState();
   const {
     transcript,
     listening,
@@ -15,6 +17,17 @@ const VoiceInput = () => {
   if (!browserSupportsSpeechRecognition) {
     return <span>Browser doesn't support speech recognition.</span>;
   }
+
+  const fetchResponse = async () => {
+    const result = await completeClaudRequest(transcript);
+    setResponse(result);
+  };
+
+  useEffect(() => {
+    if (transcript) {
+      fetchResponse();
+    }
+  }, [transcript]);
 
   return (
     <div>
@@ -39,16 +52,10 @@ const VoiceInput = () => {
         <Button colorScheme="teal" variant="outline" onClick={resetTranscript}>
           Reset Transcript
         </Button>
-
-        <Button
-          colorScheme="teal"
-          variant="outline"
-          onClick={completeClaudRequest}
-        >
-          Invoke claude text complete
-        </Button>
       </Stack>
       <p>{transcript}</p>
+
+      {response && <Text>{(response as any)?.data?.completion}</Text>}
     </div>
   );
 };
@@ -57,18 +64,19 @@ const VoiceInput = () => {
  *
  *
  */
-async function completeClaudRequest() {
+async function completeClaudRequest(transcript: any) {
   const claude = new ClaudeService();
 
   try {
     const res = await claude.complete({
-      prompt: "\n\nHuman: I have a headache, what do i do ?\n\nAssistant: ",
+      prompt: `\n\nHuman: ${transcript} ?\n\nAssistant: `,
       model: "claude-v1",
       max_tokens_to_sample: 300,
       stop_sequences: ["\n\nHuman:"],
     });
 
     console.log("res", res);
+    return res as any;
   } catch (error) {
     console.log("completeClaudRequest >> error ", error);
   }
