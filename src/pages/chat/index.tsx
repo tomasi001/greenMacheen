@@ -43,9 +43,8 @@ export default function ChatPage() {
 
   const sendPrompt = async () => {
     setPromptArray([...promptArray, prompt])
-    let final_prompt = prompt + ". Less than 200 characters and do not include Here is a character response in your answer."
     setPrompt("")
-    const result = await completeClaudRequest(final_prompt);
+    const result = await completeClaudRequest(prompt);
     //setResponse(result.data.completion.replace(/• /g, "\n"))
     setResponseArray([...responseArray, result.data.completion.replace(/• /g, "\n")])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
@@ -89,7 +88,7 @@ export default function ChatPage() {
           </Text>
           <Button bg="#F79009">Emergancy</Button>
           <Box bg="white" border="1px" minW="100%" padding={3}>
-            <SimpleGrid spacing={3}>
+            <SimpleGrid spacing={3} >
                 {
                     messageArray.map((message, index)=>(
                       <Box key={index} textAlign={index % 2 ? "left" : "right"}>{message}</Box>
@@ -145,10 +144,12 @@ async function completeClaudRequest(transcript: any) {
 
   try {
     const res = await claude.complete({
-      prompt: `\n\nHuman: ${transcript} ?\n\nAssistant: `,
+      prompt: `\n\nHuman: ${transcript} ? Include only scientific answers less than 200 characters and do not include Here is a character response in your answer. \n\nAssistant: `,
       model: "claude-v1",
       max_tokens_to_sample: 300,
       stop_sequences: ["\n\nHuman:"],
+      temperature: 0.2,
+      top_k: 0.5
     });
 
     console.log("res", res);
