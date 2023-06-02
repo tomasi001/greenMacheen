@@ -52,7 +52,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!listening && transcript) {
-      fetchResponse();
+      sendPrompt();
     }
   }, [transcript, listening]);
 
@@ -87,19 +87,17 @@ export default function ChatPage() {
             Hi there! Get started by chatting to Ozzy
           </Text>
           <Button bg="#F79009">Emergancy</Button>
-          <Box bg="white" border="1px" minW="100%" padding={3}>
+          <Box bg="white" border="1px" minW="100%" padding={5} rounded="xl">
             <SimpleGrid spacing={3} >
                 {
                     messageArray.map((message, index)=>(
-                      <Box key={index} textAlign={index % 2 ? "left" : "right"}>{message}</Box>
+                      <Box key={index} textAlign={index % 2 ? "left" : "right"} bg={index % 2 ? "#23BECC1A" : "#F79009"} rounded="xl" p={3} textColor="black">
+                        {message}
+                      </Box>
                     ))
                 }
             </SimpleGrid>
-            
           </Box>
-          <VStack>
-            
-          </VStack>
           <HStack>
               
             <Input placeholder="You can speak or type to talk to Ozzy..." bg="white" width="50vh" shadow="xl" onChange={handleInput} value={prompt}/>
