@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Center,
+  Flex,
   Grid,
   HStack,
   Input,
@@ -20,12 +21,20 @@ import { ClaudeService } from "~/@core/services/claude/cloude-service";
 import Image from "next/image";
 
 
+const buttonsText = [
+  "I am having a panic attack how do I calm myself down ?",
+  "Emergency Help",
+  "Teach me how to do CPR",
+  "How to correctly use an epipen",
+];
+
 export default function ChatPage() {
   const [response, setResponse] = useState("");
   const [prompt, setPrompt] = useState("");
   const [promptArray, setPromptArray] = useState([])
   const [responseArray, setResponseArray] = useState([])
   const textareaRef = useRef()
+  const [isTyping, setIsTyping] = useState(false)
 
   let messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
 
@@ -46,8 +55,21 @@ export default function ChatPage() {
     setPromptArray([...promptArray, prompt])
     setPrompt("")
     const result = await completeClaudRequest(prompt);
-    //setResponse(result.data.completion.replace(/• /g, "\n"))
-    setResponseArray([...responseArray, result.data.completion.replace(/• /g, "\n")])
+    const result_string = result.data.completion.replace("911", "10177")
+    setResponseArray([...responseArray, result_string])
+    messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
+  }
+
+  const testBtn = async (text) =>{
+    if(text == "Emergency Help"){
+      text = "Closet hospital near me in Cape Town South Africa with phone numbers"
+    }
+    setPrompt(text)
+    setPromptArray([...promptArray, text])
+    setPrompt("")
+    const result = await completeClaudRequest(text);
+    const result_string = result.data.completion.replace("911", "10177")
+    setResponseArray([...responseArray, result_string])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
   }
 
@@ -63,13 +85,6 @@ export default function ChatPage() {
 
   return (
     <Center h="100vh" bg="##F6FEFD">
-      {/* <Lotty
-        bottom="185px"
-        right="70px"
-        position="absolute"
-        transform="scale(0.3)"
-      /> */}
-      
       <Box
         w={["90%", "80%"]}
         bg="#FFFCF5"
@@ -89,7 +104,27 @@ export default function ChatPage() {
           <Text as="b" fontSize="3xl" textAlign="center">
             Hi there! Get started by chatting to Ozzy
           </Text>
-          <Button bg="#F79009">Emergancy</Button>
+          <Grid
+            templateColumns={["repeat(2, 1fr)", "repeat(4, 1fr)"]}
+            gap={[3, 5]}
+          >
+            {buttonsText.map((text, index) => {
+              return (
+                <Button
+                  key={index}
+                  whiteSpace="normal"
+                  bg="#F79009"
+                  textColor="white"
+                  shadow="lg"
+                  padding={3}
+                  height="auto"
+                  onClick={()=>testBtn(text)}
+                >
+                  {text}
+                </Button>
+              );
+            })}
+          </Grid>
           <Box bg="white" border="1px" minW="100%" padding={5} rounded="xl">
             <SimpleGrid spacing={3} >
                 {
@@ -101,13 +136,12 @@ export default function ChatPage() {
                 }
             </SimpleGrid>
           </Box>
+          <Textarea placeholder="You can speak or type to talk to Ozzy..." bg="white" width="90%" shadow="xl" onChange={handleInput} value={prompt} ref={textareaRef} />
           <HStack>
-          
-            <Textarea placeholder="You can speak or type to talk to Ozzy..." bg="white" width="50vh" shadow="xl" onChange={handleInput} value={prompt} ref={textareaRef} />
-            <Button bg="#F79009" size="md" variant="solid"
+            <Button bg="#F79009" variant="solid"
                 borderRadius="full"
-                height="45px"
-                width="45px"
+                height={["60px","45px"]}
+                width={["60px","45px"]}
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"
@@ -116,10 +150,10 @@ export default function ChatPage() {
               >
               <i className="ri-send-plane-2-line"></i>
             </Button>
-              <Button bg="#F79009" size="md" variant="solid"
+            <Button bg="#F79009" size="md" variant="solid"
                 borderRadius="full"
-                height="45px"
-                width="45px"
+                height={["60px","45px"]}
+                width={["60px","45px"]}
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"

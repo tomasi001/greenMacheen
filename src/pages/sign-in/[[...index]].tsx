@@ -11,17 +11,7 @@ export default function Page() {
       width="100vw"
       height="100vh"
     >
-      <Flex pt="30vh">
-        <Lotty
-          bottom="185px"
-          right="70px"
-          position="absolute"
-          transform="scale(0.3)"
-        />
-        <Flex>
-          <SignIn />
-        </Flex>
-      </Flex>
+      <SignIn />
     </Flex>
   );
 }

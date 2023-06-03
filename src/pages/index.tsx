@@ -3,6 +3,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Lotty from "~/components/Lotty";
+import Image from "next/image";
 
 const Home: NextPage = () => {
   return (
@@ -14,14 +15,9 @@ const Home: NextPage = () => {
       </Head>
       <main>
         <Center h="100vh" bg="##F6FEFD">
-          <Lotty
-            bottom="120px"
-            right="70px"
-            position="absolute"
-            transform="scale(0.3)"
-          />
           <Box w={["90%", "30%"]} bg="#FFFCF5" shadow="xl" rounded="xl">
             <VStack paddingY={"3vh"} spacing={10}>
+              <Image src="/Ozzy.png" alt="Ozzy" width={100} height={30}/>
               <Text fontSize="50px">
                 <Text fontWeight="bold" as="span">
                   Ozzy{" "}
