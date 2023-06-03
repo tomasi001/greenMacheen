@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Center,
-  Flex,
   Grid,
   HStack,
   Input,
@@ -57,7 +56,8 @@ export default function ChatPage() {
     setPromptArray([...promptArray, prompt])
     setPrompt("")
     const result = await completeClaudRequest(prompt);
-    const result_string = result.data.completion.replace("911", "10177")
+    let result_string = result.data.completion.replace("911", "10177")
+    result_string = result.data.completion.replace("Claude", "Ozzy")
     setResponseArray([...responseArray, result_string])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
     setIsLoading(false)
@@ -72,7 +72,8 @@ export default function ChatPage() {
     setPromptArray([...promptArray, text])
     setPrompt("")
     const result = await completeClaudRequest(text);
-    const result_string = result.data.completion.replace("911", "10177")
+    let result_string = result.data.completion.replace("911", "10177")
+    result_string = result.data.completion.replace("Claude", "Ozzy")
     setResponseArray([...responseArray, result_string])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
     setIsLoading(false)
