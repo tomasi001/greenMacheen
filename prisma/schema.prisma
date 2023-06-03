@@ -1,19 +1,22 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
-}
-
 datasource db {
     provider     = "mysql"
     url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
 
-model Example {
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["jsonProtocol"]
+}
+
+model Chat {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    message   String   @db.LongText
+    response  String   @db.LongText
+    userId    String
+
+    @@index([userId])
 }
