@@ -2,25 +2,31 @@ import {
   Box,
   Button,
   Center,
+  Grid,
   HStack,
   SimpleGrid,
+  Spinner,
   Text,
   Textarea,
   VStack,
-  Spinner,
-  Grid,
 } from "@chakra-ui/react";
 import { useUser } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 import Image from "next/image";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { v4 as uuidv4 } from "uuid";
 import { ClaudeService } from "~/@core/services/claude/cloude-service";
 import { api } from "~/utils/api";
-import { v4 as uuidv4 } from "uuid";
 
 const buttonsText = [
   "I am having a panic attack how do I calm myself down ?",
@@ -33,11 +39,11 @@ export default function ChatPage() {
   const posthog = usePostHog();
   const [response, setResponse] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [promptArray, setPromptArray] = useState([]);
-  const [responseArray, setResponseArray] = useState([]);
+  const [promptArray, setPromptArray] = useState<string[]>([]);
+  const [responseArray, setResponseArray] = useState<string[]>([]);
+  const [messageArray, setMessageArray] = useState<(string | undefined)[]>([]);
   const [sessionId] = useState(uuidv4());
-  const textareaRef = useRef();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useUser();
 
   const { mutate } = api.chat.create.useMutation();
@@ -58,40 +64,49 @@ export default function ChatPage() {
     }
   }, [prompt, response, mutate, user?.id, sessionId]);
 
-  let messageArray = promptArray.flatMap((item, index) => [
-    item,
-    responseArray[index],
-  ]);
+  useEffect(() => {
+    setMessageArray(
+      promptArray.flatMap((item, index) => [item, responseArray[index]])
+    );
+  }, [promptArray, responseArray]);
 
   const [isLoading, setIsLoading] = useState(false);
   const { transcript, listening } = useSpeechRecognition();
 
-  const handleInput = (event) => {
+  const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
 
   useEffect(() => {
     const textArea = textareaRef.current;
-    textArea.style.height = "auto";
-    textArea.style.height = `${textArea.scrollHeight}px`;
+    if (textArea) {
+      textArea.style.height = "auto";
+      textArea.style.height = `${textArea.scrollHeight}px`;
+    }
   }, [prompt]);
 
-  const sendPrompt = async () => {
+  const sendPrompt = useCallback(async () => {
     setIsLoading(true);
-    setPromptArray([...promptArray, prompt]);
+    setPromptArray((prevArray) => [...prevArray, prompt]);
     const result = await completeClaudRequest(prompt);
-    let result_string = result.data.completion.replace("911", "10177");
-    result_string = result.data.completion.replace("Claude", "Ozzy");
-    setResponse(result.data.completion);
-    setResponseArray([...responseArray, result_string]);
-    messageArray = promptArray.flatMap((item, index) => [
-      item,
-      responseArray[index],
-    ]);
+    const result_string =
+      result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
+    setResponse(result_string);
+    setResponseArray((prevArray) => [...prevArray, result_string]);
+    setMessageArray((prevArray: (string | undefined)[]) => {
+      return promptArray.flatMap((item, index) => [item, prevArray[index]]);
+    });
     setIsLoading(false);
-  };
+  }, [
+    prompt,
+    setPromptArray,
+    setResponse,
+    setResponseArray,
+    setMessageArray,
+    promptArray,
+  ]);
 
-  const testBtn = async (text) => {
+  const testBtn = async (text: string) => {
     setIsLoading(true);
     if (text == "Emergency Help") {
       text =
@@ -100,22 +115,23 @@ export default function ChatPage() {
     setPrompt(text);
     setPromptArray([...promptArray, text]);
     const result = await completeClaudRequest(text);
-    let result_string = result.data.completion.replace("911", "10177");
-    result_string = result.data.completion.replace("Claude", "Ozzy");
-    setResponse(result.data.completion);
+    const result_string =
+      result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
+    setResponse(result_string);
     setResponseArray([...responseArray, result_string]);
-    messageArray = promptArray.flatMap((item, index) => [
-      item,
-      responseArray[index],
-    ]);
+    setMessageArray((prevArray: (string | undefined)[]) => {
+      return promptArray.flatMap((item, index) => [item, prevArray[index]]);
+    });
     setIsLoading(false);
   };
 
   useEffect(() => {
     if (!listening && transcript) {
-      sendPrompt();
+      sendPrompt().catch((error) => {
+        console.log("Error Sending Prompt", error);
+      });
     }
-  }, [transcript, listening]);
+  }, [transcript, listening, sendPrompt]);
 
   useEffect(() => {
     setPrompt(transcript);
@@ -156,7 +172,11 @@ export default function ChatPage() {
                   shadow="lg"
                   padding={3}
                   height="auto"
-                  onClick={() => testBtn(text)}
+                  onClick={() => {
+                    testBtn(text).catch((error) => {
+                      console.log("Error with preset prompt button", error);
+                    });
+                  }}
                 >
                   {text}
                 </Button>
@@ -202,7 +222,11 @@ export default function ChatPage() {
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"
-                onClick={sendPrompt}
+                onClick={() => {
+                  sendPrompt().catch((error) => {
+                    console.log("Error sending prompt", error);
+                  });
+                }}
                 isLoading={isLoading}
               >
                 <i className="ri-send-plane-2-line"></i>
@@ -218,8 +242,9 @@ export default function ChatPage() {
                 shadow="xl"
                 textColor="white"
                 onClick={() => {
-                  // setResponse("");
-                  SpeechRecognition.startListening();
+                  SpeechRecognition.startListening().catch((error) => {
+                    console.log("Error With Speach Recognition", error);
+                  });
                 }}
                 isLoading={isLoading}
               >
@@ -234,7 +259,7 @@ export default function ChatPage() {
   );
 }
 
-async function completeClaudRequest(transcript: any) {
+async function completeClaudRequest(transcript: string) {
   const claude = new ClaudeService();
 
   try {
@@ -246,7 +271,7 @@ async function completeClaudRequest(transcript: any) {
       temperature: 0.2,
       top_k: 0.5,
     });
-    return res as any;
+    return res.completion;
   } catch (error) {
     console.log("completeClaudRequest >> error ", error);
   }
