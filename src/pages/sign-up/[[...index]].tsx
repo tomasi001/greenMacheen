@@ -1,18 +1,15 @@
-import { Flex } from "@chakra-ui/react";
+import { VStack, Link, Button } from "@chakra-ui/react";
 import { SignUp } from "@clerk/nextjs";
 import Lotty from "~/components/Lotty";
 import Image from "next/image";
 
 export default function Page() {
   return (
-    <Flex
-      alignItems="center"
-      justifyContent="space-between"
-      flexDir="column"
-      width="100vw"
-      height="100vh"
-    >
+    <VStack spacing={6} my="auto">
       <SignUp />
-    </Flex>
+      <Link href="/">
+        <Button bg="#F79009" textColor="white">Back</Button>
+      </Link>
+    </VStack>
   );
 }
