@@ -1,4 +1,4 @@
-import { ChakraProvider, Flex } from "@chakra-ui/react";
+import { Box, ChakraProvider, Flex, Text } from "@chakra-ui/react";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { type AppType } from "next/app";
 import { useRouter } from "next/router";
@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { useEffect } from "react";
 import "regenerator-runtime/runtime";
+import Footer from "~/components/footer";
 import "~/styles/font.css";
 import "~/styles/globals.css";
 import { theme } from "~/theme";
@@ -48,6 +49,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
             <UserButton afterSignOutUrl="/" />
           </Flex>
           <Component {...pageProps} />
+          <Footer />
         </ChakraProvider>
       </ClerkProvider>
     </PostHogProvider>
