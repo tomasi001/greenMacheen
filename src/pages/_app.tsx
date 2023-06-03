@@ -1,6 +1,7 @@
-import { Box, ChakraProvider, Flex, Text } from "@chakra-ui/react";
+import { Button, ChakraProvider, Flex } from "@chakra-ui/react";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { type AppType } from "next/app";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
@@ -11,8 +12,11 @@ import "~/styles/font.css";
 import "~/styles/globals.css";
 import { theme } from "~/theme";
 import { api } from "~/utils/api";
-const postHogPublicKey = "phc_Q3tMpjeZYQRAnmZKxPVC2mhVwJEqJsSzGHLZpWiBrp5";
-const postHogHost = "https://eu.posthog.com";
+const postHogPublicKey =
+  process.env.REACT_APP_PUBLIC_POSTHOG_KEY ||
+  "phc_Q3tMpjeZYQRAnmZKxPVC2mhVwJEqJsSzGHLZpWiBrp5";
+const postHogHost =
+  process.env.REACT_APP_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -20,6 +24,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   if (typeof window !== "undefined") {
     posthog.init(postHogPublicKey, {
       api_host: postHogHost,
+      disable_session_recording: true,
     });
   }
 
@@ -45,11 +50,26 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         {...pageProps}
       >
         <ChakraProvider theme={theme}>
-          <Flex justifyContent="flex-end" p="8px">
-            <UserButton afterSignOutUrl="/" />
-          </Flex>
+          {router.pathname !== "/" && (
+            <Flex justifyContent="space-between" p="8px">
+              <Link
+                href={
+                  router.pathname !== "/consultationHistory"
+                    ? "/consultationHistory"
+                    : "/chat"
+                }
+              >
+                <Button size="md" bg={"#F79009"}>
+                  {router.pathname !== "/consultationHistory"
+                    ? "History"
+                    : "Chat"}
+                </Button>
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </Flex>
+          )}
           <Component {...pageProps} />
-          <Footer />
+          {router.pathname === "/" && <Footer />}
         </ChakraProvider>
       </ClerkProvider>
     </PostHogProvider>

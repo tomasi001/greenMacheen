@@ -17,6 +17,7 @@ model Chat {
     message   String   @db.LongText
     response  String   @db.LongText
     userId    String
+    sessionId String
 
     @@index([userId])
 }

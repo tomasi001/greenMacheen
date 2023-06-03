@@ -2,24 +2,25 @@ import {
   Box,
   Button,
   Center,
-  Grid,
   HStack,
-  Input,
   SimpleGrid,
   Text,
   Textarea,
   VStack,
-  Spinner
+  Spinner,
+  Grid,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction  } from "react";
-import Lotty from "~/components/Lotty";
+import { useUser } from "@clerk/nextjs";
+import { usePostHog } from "posthog-js/react";
+import { useEffect, useRef, useState } from "react";
 
+import Image from "next/image";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { ClaudeService } from "~/@core/services/claude/cloude-service"; 
-import Image from "next/image";
-
+import { ClaudeService } from "~/@core/services/claude/cloude-service";
+import { api } from "~/utils/api";
+import { v4 as uuidv4 } from "uuid";
 
 const buttonsText = [
   "I am having a panic attack how do I calm myself down ?",
@@ -29,55 +30,86 @@ const buttonsText = [
 ];
 
 export default function ChatPage() {
+  const posthog = usePostHog();
   const [response, setResponse] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [promptArray, setPromptArray] = useState([])
-  const [responseArray, setResponseArray] = useState([])
-  const textareaRef = useRef()
-  const [isTyping, setIsTyping] = useState(false)
+  const [isTyping, setIsTyping] = useState(false);
+  const [promptArray, setPromptArray] = useState([]);
+  const [responseArray, setResponseArray] = useState([]);
+  const [sessionId] = useState(uuidv4());
+  const textareaRef = useRef();
+  const { user } = useUser();
 
-  let messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
+  const { mutate } = api.chat.create.useMutation();
+
+  useEffect(() => {
+    if (user) {
+      posthog?.identify(user?.primaryEmailAddress?.emailAddress || "", {
+        email: user?.primaryEmailAddress?.emailAddress,
+      });
+    }
+  }, [posthog, user]);
+
+  useEffect(() => {
+    if (prompt.length > 0 && response.length > 0) {
+      mutate({ message: prompt, response, userId: user?.id || "", sessionId });
+      setPrompt("");
+      setResponse("");
+    }
+  }, [prompt, response, mutate, user?.id, sessionId]);
+
+  let messageArray = promptArray.flatMap((item, index) => [
+    item,
+    responseArray[index],
+  ]);
 
   const [isLoading, setIsLoading] = useState(false);
   const { transcript, listening } = useSpeechRecognition();
 
-  const handleInput = (event) =>{
-    setPrompt(event.target.value)
-  }
+  const handleInput = (event) => {
+    setPrompt(event.target.value);
+  };
 
-  useEffect(()=>{
-    const textArea = textareaRef.current
-    textArea.style.height = 'auto'
-    textArea.style.height = `${textArea.scrollHeight}px`
-  }, [prompt])
+  useEffect(() => {
+    const textArea = textareaRef.current;
+    textArea.style.height = "auto";
+    textArea.style.height = `${textArea.scrollHeight}px`;
+  }, [prompt]);
 
   const sendPrompt = async () => {
-    setIsLoading(true)
-    setPromptArray([...promptArray, prompt])
-    setPrompt("")
+    setIsLoading(true);
+    setPromptArray([...promptArray, prompt]);
     const result = await completeClaudRequest(prompt);
-    let result_string = result.data.completion.replace("911", "10177")
-    result_string = result.data.completion.replace("Claude", "Ozzy")
-    setResponseArray([...responseArray, result_string])
-    messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
-    setIsLoading(false)
-  }
+    let result_string = result.data.completion.replace("911", "10177");
+    result_string = result.data.completion.replace("Claude", "Ozzy");
+    setResponse(result.data.completion);
+    setResponseArray([...responseArray, result_string]);
+    messageArray = promptArray.flatMap((item, index) => [
+      item,
+      responseArray[index],
+    ]);
+    setIsLoading(false);
+  };
 
-  const testBtn = async (text) =>{
-    setIsLoading(true)
-    if(text == "Emergency Help"){
-      text = "Closet hospital near me in Cape Town South Africa with phone numbers"
+  const testBtn = async (text) => {
+    setIsLoading(true);
+    if (text == "Emergency Help") {
+      text =
+        "Closet hospital near me in Cape Town South Africa with phone numbers";
     }
-    setPrompt(text)
-    setPromptArray([...promptArray, text])
-    setPrompt("")
+    setPrompt(text);
+    setPromptArray([...promptArray, text]);
     const result = await completeClaudRequest(text);
-    let result_string = result.data.completion.replace("911", "10177")
-    result_string = result.data.completion.replace("Claude", "Ozzy")
-    setResponseArray([...responseArray, result_string])
-    messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
-    setIsLoading(false)
-  }
+    let result_string = result.data.completion.replace("911", "10177");
+    result_string = result.data.completion.replace("Claude", "Ozzy");
+    setResponse(result.data.completion);
+    setResponseArray([...responseArray, result_string]);
+    messageArray = promptArray.flatMap((item, index) => [
+      item,
+      responseArray[index],
+    ]);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     if (!listening && transcript) {
@@ -106,7 +138,7 @@ export default function ChatPage() {
           paddingX={[0, "15vw"]}
           paddingTop={["3vh", "0"]}
         >
-          <Image src="/Ozzy.png" alt="Ozzy" width={100} height={30}/>
+          <Image src="/Ozzy.png" alt="Ozzy" width={100} height={30} />
           <Text as="b" fontSize="3xl" textAlign="center">
             Hi there! Get started by chatting to Ozzy
           </Text>
@@ -124,7 +156,7 @@ export default function ChatPage() {
                   shadow="lg"
                   padding={3}
                   height="auto"
-                  onClick={()=>testBtn(text)}
+                  onClick={() => testBtn(text)}
                 >
                   {text}
                 </Button>
@@ -132,61 +164,71 @@ export default function ChatPage() {
             })}
           </Grid>
           <Box bg="white" border="1px" minW="100%" padding={5} rounded="xl">
-            <SimpleGrid spacing={3} >
-                {
-                    messageArray.map((message, index)=>(
-                      <Box key={index} textAlign={index % 2 ? "left" : "right"} bg={index % 2 ? "#23BECC1A" : "#F79009"} rounded="xl" p={3} textColor="black">
-                        {message}
-                      </Box>
-                    ))
-                }
+            <SimpleGrid spacing={3}>
+              {messageArray.map((message, index) => (
+                <Box
+                  key={index}
+                  textAlign={index % 2 ? "left" : "right"}
+                  bg={index % 2 ? "#23BECC1A" : "#F79009"}
+                  rounded="xl"
+                  p={3}
+                  textColor="black"
+                >
+                  {message}
+                </Box>
+              ))}
             </SimpleGrid>
           </Box>
-          <Textarea placeholder="You can speak or type to talk to Ozzy..." bg="white" width="90%" shadow="xl" onChange={handleInput} value={prompt} ref={textareaRef} />
-          
-            {
-              isLoading ? 
-              (
-                <Spinner color="#F79009"  />
-              ) 
-              : 
-              (
-                <HStack>
-                <Button bg="#F79009" variant="solid"
+          <Textarea
+            placeholder="You can speak or type to talk to Ozzy..."
+            bg="white"
+            width="90%"
+            shadow="xl"
+            onChange={handleInput}
+            value={prompt}
+            ref={textareaRef}
+          />
+
+          {isLoading ? (
+            <Spinner color="#F79009" />
+          ) : (
+            <HStack>
+              <Button
+                bg="#F79009"
+                variant="solid"
                 borderRadius="full"
-                height={["60px","45px"]}
-                width={["60px","45px"]}
+                height={["60px", "45px"]}
+                width={["60px", "45px"]}
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"
                 onClick={sendPrompt}
                 isLoading={isLoading}
               >
-              <i className="ri-send-plane-2-line"></i>
+                <i className="ri-send-plane-2-line"></i>
               </Button>
-              <Button bg="#F79009" size="md" variant="solid"
+              <Button
+                bg="#F79009"
+                size="md"
+                variant="solid"
                 borderRadius="full"
-                height={["60px","45px"]}
-                width={["60px","45px"]}
+                height={["60px", "45px"]}
+                width={["60px", "45px"]}
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"
                 onClick={() => {
-                  setResponse("");
+                  // setResponse("");
                   SpeechRecognition.startListening();
                 }}
                 isLoading={isLoading}
               >
-              <i className="ri-mic-line"></i>
-            </Button>
+                <i className="ri-mic-line"></i>
+              </Button>
             </HStack>
-              )
-            }
-            
-          
+          )}
         </VStack>
-        <Center>
-        </Center>
+        <Center></Center>
       </Box>
     </Center>
   );
@@ -202,7 +244,7 @@ async function completeClaudRequest(transcript: any) {
       max_tokens_to_sample: 300,
       stop_sequences: ["\n\nHuman:"],
       temperature: 0.2,
-      top_k: 0.5
+      top_k: 0.5,
     });
     return res as any;
   } catch (error) {

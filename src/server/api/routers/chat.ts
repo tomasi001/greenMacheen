@@ -1,15 +1,40 @@
+import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const chatRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.chat.findMany();
+  getChatHistory: privateProcedure.query(async ({ ctx }) => {
+    const userId = ctx.currentUserId;
+
+    const chatHistory = await ctx.prisma.chat.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return chatHistory;
   }),
+  create: privateProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        message: z.string(),
+        response: z.string(),
+        sessionId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.currentUserId;
+      const { message, response, sessionId } = input;
+      const chat = await ctx.prisma.chat.create({
+        data: {
+          userId,
+          message,
+          response,
+          sessionId,
+        },
+      });
+
+      return chat;
+    }),
 });
