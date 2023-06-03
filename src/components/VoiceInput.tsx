@@ -56,10 +56,6 @@ const VoiceInput = ({ setResponse, setTranscript }: VoiceInputProps) => {
   );
 };
 
-/**
- *
- *
- */
 async function completeClaudRequest(transcript: any) {
   const claude = new ClaudeService();
 
