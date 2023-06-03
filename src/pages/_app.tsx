@@ -62,13 +62,15 @@ const MyApp: AppType = ({ Component, pageProps }) => {
                     : "/chat"
                 }
               >
-                <Button size="md" bg={"#F79009"}>
+                <Button zIndex={2} size="md" bg={"#F79009"}>
                   {router.pathname !== "/consultationHistory"
                     ? "History"
                     : "Chat"}
                 </Button>
               </Link>
-              <UserButton afterSignOutUrl="/" />
+              <div style={{ zIndex: 2 }}>
+                <UserButton afterSignOutUrl="/" />
+              </div>
             </Flex>
           )}
           <Component {...pageProps} />
