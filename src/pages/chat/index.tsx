@@ -10,6 +10,7 @@ import {
   Text,
   Textarea,
   VStack,
+  Spinner
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction  } from "react";
 import Lotty from "~/components/Lotty";
@@ -52,15 +53,18 @@ export default function ChatPage() {
   }, [prompt])
 
   const sendPrompt = async () => {
+    setIsLoading(true)
     setPromptArray([...promptArray, prompt])
     setPrompt("")
     const result = await completeClaudRequest(prompt);
     const result_string = result.data.completion.replace("911", "10177")
     setResponseArray([...responseArray, result_string])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
+    setIsLoading(false)
   }
 
   const testBtn = async (text) =>{
+    setIsLoading(true)
     if(text == "Emergency Help"){
       text = "Closet hospital near me in Cape Town South Africa with phone numbers"
     }
@@ -71,6 +75,7 @@ export default function ChatPage() {
     const result_string = result.data.completion.replace("911", "10177")
     setResponseArray([...responseArray, result_string])
     messageArray = promptArray.flatMap((item, index) => [item, responseArray[index]])
+    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -137,8 +142,16 @@ export default function ChatPage() {
             </SimpleGrid>
           </Box>
           <Textarea placeholder="You can speak or type to talk to Ozzy..." bg="white" width="90%" shadow="xl" onChange={handleInput} value={prompt} ref={textareaRef} />
-          <HStack>
-            <Button bg="#F79009" variant="solid"
+          
+            {
+              isLoading ? 
+              (
+                <Spinner color="#F79009"  />
+              ) 
+              : 
+              (
+                <HStack>
+                <Button bg="#F79009" variant="solid"
                 borderRadius="full"
                 height={["60px","45px"]}
                 width={["60px","45px"]}
@@ -149,8 +162,8 @@ export default function ChatPage() {
                 isLoading={isLoading}
               >
               <i className="ri-send-plane-2-line"></i>
-            </Button>
-            <Button bg="#F79009" size="md" variant="solid"
+              </Button>
+              <Button bg="#F79009" size="md" variant="solid"
                 borderRadius="full"
                 height={["60px","45px"]}
                 width={["60px","45px"]}
@@ -165,7 +178,11 @@ export default function ChatPage() {
               >
               <i className="ri-mic-line"></i>
             </Button>
-          </HStack>
+            </HStack>
+              )
+            }
+            
+          
         </VStack>
         <Center>
         </Center>
