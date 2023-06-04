@@ -11,7 +11,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import SpeechRecognition, {
@@ -33,11 +33,10 @@ export default function ChatPage() {
   const posthog = usePostHog();
   const [response, setResponse] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [promptArray, setPromptArray] = useState([]);
-  const [responseArray, setResponseArray] = useState([]);
+  const [promptArray, setPromptArray] = useState<string[]>([]);
+  const [responseArray, setResponseArray] = useState<string[]>([]);
   const [sessionId] = useState(uuidv4());
-  const textareaRef = useRef();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useUser();
 
   const { mutate } = api.chat.create.useMutation();
@@ -66,23 +65,26 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { transcript, listening } = useSpeechRecognition();
 
-  const handleInput = (event) => {
+  const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
 
   useEffect(() => {
     const textArea = textareaRef.current;
-    textArea.style.height = "auto";
-    textArea.style.height = `${textArea.scrollHeight}px`;
+    if (textArea) {
+      textArea.style.height = "auto";
+      textArea.style.height = `${textArea.scrollHeight}px`;
+    }
   }, [prompt]);
 
   const sendPrompt = async () => {
     setIsLoading(true);
     setPromptArray([...promptArray, prompt]);
     const result = await completeClaudRequest(prompt);
-    let result_string = result.data.completion.replace("911", "10177");
-    result_string = result.data.completion.replace("Claude", "Ozzy");
-    setResponse(result.data.completion);
+    const result_string =
+      result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
+    setResponse(result_string);
+    setResponseArray([...responseArray, result_string]);
     setResponseArray([...responseArray, result_string]);
     messageArray = promptArray.flatMap((item, index) => [
       item,
@@ -91,7 +93,7 @@ export default function ChatPage() {
     setIsLoading(false);
   };
 
-  const testBtn = async (text) => {
+  const testBtn = async (text: string) => {
     setIsLoading(true);
     if (text == "Emergency Help") {
       text =
@@ -100,9 +102,9 @@ export default function ChatPage() {
     setPrompt(text);
     setPromptArray([...promptArray, text]);
     const result = await completeClaudRequest(text);
-    let result_string = result.data.completion.replace("911", "10177");
-    result_string = result.data.completion.replace("Claude", "Ozzy");
-    setResponse(result.data.completion);
+    const result_string =
+      result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
+    setResponse(result_string);
     setResponseArray([...responseArray, result_string]);
     messageArray = promptArray.flatMap((item, index) => [
       item,
@@ -113,8 +115,12 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!listening && transcript) {
-      sendPrompt();
+      sendPrompt().catch((error) => {
+        console.log("Error Sending Prompt", error);
+      });
     }
+    // including send prompt causes an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript, listening]);
 
   useEffect(() => {
@@ -156,7 +162,11 @@ export default function ChatPage() {
                   shadow="lg"
                   padding={3}
                   height="auto"
-                  onClick={() => testBtn(text)}
+                  onClick={() => {
+                    testBtn(text).catch((error) => {
+                      console.log("Error with preset prompt button", error);
+                    });
+                  }}
                 >
                   {text}
                 </Button>
@@ -202,7 +212,11 @@ export default function ChatPage() {
                 fontSize="23px"
                 shadow="xl"
                 textColor="white"
-                onClick={sendPrompt}
+                onClick={() => {
+                  sendPrompt().catch((error) => {
+                    console.log("Error sending prompt", error);
+                  });
+                }}
                 isLoading={isLoading}
               >
                 <i className="ri-send-plane-2-line"></i>
@@ -218,8 +232,9 @@ export default function ChatPage() {
                 shadow="xl"
                 textColor="white"
                 onClick={() => {
-                  // setResponse("");
-                  SpeechRecognition.startListening();
+                  SpeechRecognition.startListening().catch((error) => {
+                    console.log("Error With Speach Recognition", error);
+                  });
                 }}
                 isLoading={isLoading}
               >
@@ -234,7 +249,7 @@ export default function ChatPage() {
   );
 }
 
-async function completeClaudRequest(transcript: any) {
+async function completeClaudRequest(transcript: string) {
   const claude = new ClaudeService();
 
   try {
@@ -246,7 +261,7 @@ async function completeClaudRequest(transcript: any) {
       temperature: 0.2,
       top_k: 0.5,
     });
-    return res as any;
+    return res.completion;
   } catch (error) {
     console.log("completeClaudRequest >> error ", error);
   }

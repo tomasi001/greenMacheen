@@ -38,6 +38,9 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     };
   }, [router.events]);
 
+  const pathName = router.pathname;
+  const regex = /^\/$|^.*\/sign\-up.*$|^.*\/sign\-in.*$/;
+
   return (
     <PostHogProvider client={posthog}>
       <ClerkProvider
@@ -50,7 +53,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         {...pageProps}
       >
         <ChakraProvider theme={theme}>
-          {router.pathname !== "/" && (
+          {!regex.test(pathName) && (
             <Flex justifyContent="space-between" p="8px">
               <Link
                 href={
@@ -59,13 +62,15 @@ const MyApp: AppType = ({ Component, pageProps }) => {
                     : "/chat"
                 }
               >
-                <Button size="md" bg={"#F79009"}>
+                <Button zIndex={2} size="md" bg={"#F79009"}>
                   {router.pathname !== "/consultationHistory"
                     ? "History"
                     : "Chat"}
                 </Button>
               </Link>
-              <UserButton afterSignOutUrl="/" />
+              <div style={{ zIndex: 2 }}>
+                <UserButton afterSignOutUrl="/" />
+              </div>
             </Flex>
           )}
           <Component {...pageProps} />
