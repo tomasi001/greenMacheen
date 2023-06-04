@@ -2,31 +2,25 @@ import {
   Box,
   Button,
   Center,
-  Grid,
   HStack,
   SimpleGrid,
-  Spinner,
   Text,
   Textarea,
   VStack,
+  Spinner,
+  Grid,
 } from "@chakra-ui/react";
 import { useUser } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { v4 as uuidv4 } from "uuid";
 import { ClaudeService } from "~/@core/services/claude/cloude-service";
 import { api } from "~/utils/api";
+import { v4 as uuidv4 } from "uuid";
 
 const buttonsText = [
   "I am having a panic attack how do I calm myself down ?",
@@ -41,7 +35,6 @@ export default function ChatPage() {
   const [prompt, setPrompt] = useState("");
   const [promptArray, setPromptArray] = useState<string[]>([]);
   const [responseArray, setResponseArray] = useState<string[]>([]);
-  const [messageArray, setMessageArray] = useState<(string | undefined)[]>([]);
   const [sessionId] = useState(uuidv4());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useUser();
@@ -64,11 +57,10 @@ export default function ChatPage() {
     }
   }, [prompt, response, mutate, user?.id, sessionId]);
 
-  useEffect(() => {
-    setMessageArray(
-      promptArray.flatMap((item, index) => [item, responseArray[index]])
-    );
-  }, [promptArray, responseArray]);
+  let messageArray = promptArray.flatMap((item, index) => [
+    item,
+    responseArray[index],
+  ]);
 
   const [isLoading, setIsLoading] = useState(false);
   const { transcript, listening } = useSpeechRecognition();
@@ -85,26 +77,21 @@ export default function ChatPage() {
     }
   }, [prompt]);
 
-  const sendPrompt = useCallback(async () => {
+  const sendPrompt = async () => {
     setIsLoading(true);
-    setPromptArray((prevArray) => [...prevArray, prompt]);
+    setPromptArray([...promptArray, prompt]);
     const result = await completeClaudRequest(prompt);
     const result_string =
       result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
     setResponse(result_string);
-    setResponseArray((prevArray) => [...prevArray, result_string]);
-    setMessageArray((prevArray: (string | undefined)[]) => {
-      return promptArray.flatMap((item, index) => [item, prevArray[index]]);
-    });
+    setResponseArray([...responseArray, result_string]);
+    setResponseArray([...responseArray, result_string]);
+    messageArray = promptArray.flatMap((item, index) => [
+      item,
+      responseArray[index],
+    ]);
     setIsLoading(false);
-  }, [
-    prompt,
-    setPromptArray,
-    setResponse,
-    setResponseArray,
-    setMessageArray,
-    promptArray,
-  ]);
+  };
 
   const testBtn = async (text: string) => {
     setIsLoading(true);
@@ -119,9 +106,10 @@ export default function ChatPage() {
       result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
     setResponse(result_string);
     setResponseArray([...responseArray, result_string]);
-    setMessageArray((prevArray: (string | undefined)[]) => {
-      return promptArray.flatMap((item, index) => [item, prevArray[index]]);
-    });
+    messageArray = promptArray.flatMap((item, index) => [
+      item,
+      responseArray[index],
+    ]);
     setIsLoading(false);
   };
 
@@ -131,7 +119,9 @@ export default function ChatPage() {
         console.log("Error Sending Prompt", error);
       });
     }
-  }, [transcript, listening, sendPrompt]);
+    // including send prompt causes an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcript, listening]);
 
   useEffect(() => {
     setPrompt(transcript);
