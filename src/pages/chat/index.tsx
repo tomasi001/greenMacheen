@@ -128,7 +128,7 @@ export default function ChatPage() {
   }, [transcript]);
 
   return (
-    <Center h="100vh" bg="##F6FEFD">
+    <Center bg="##F6FEFD">
       <Box
         w={["90%", "80%"]}
         bg="#FFFCF5"
