@@ -3,7 +3,6 @@ import {
   Button,
   Center,
   HStack,
-  SimpleGrid,
   Text,
   Textarea,
   VStack,
@@ -16,13 +15,13 @@ import { usePostHog } from "posthog-js/react";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
-import { ClaudeService } from "~/@core/services/claude/cloude-service";
+
+
 import { api } from "~/utils/api";
 import { v4 as uuidv4 } from "uuid";
-import MessageBubble from "./MessageBubble";
+import MessageBubble from "../../components/MessageBubble";
+import { completeClaudRequest } from "~/utils/claude";
+import VoicePrompt from "~/components/VoicePrompt";
 
 const buttonsText = [
   "I am having a panic attack how do I calm myself down ?",
@@ -40,7 +39,6 @@ export default function ChatPage() {
   const [sessionId] = useState(uuidv4());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useUser();
-
 
   const { mutate } = api.chat.create.useMutation();
 
@@ -66,7 +64,7 @@ export default function ChatPage() {
   ]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const { transcript, listening } = useSpeechRecognition();
+
 
   const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -82,17 +80,20 @@ export default function ChatPage() {
 
   const sendPrompt = async () => {
     setIsLoading(true);
+
     setPromptArray([...promptArray, prompt]);
-    const result = await completeClaudRequest(prompt);
-    const result_string =
-      result?.replace("911", "10177").replace("Claude", "Ozzy") || "";
-    setResponse(result_string);
-    setResponseArray([...responseArray, result_string]);
-    setResponseArray([...responseArray, result_string]);
+
+    const result = await completeClaudRequest(prompt) as string;
+
+    setResponse(result);
+    setResponseArray([...responseArray, result]);
+    setResponseArray([...responseArray, result]);
+
     messageArray = promptArray.flatMap((item, index) => [
       item,
       responseArray[index],
     ]);
+
     setIsLoading(false);
   };
 
@@ -116,19 +117,9 @@ export default function ChatPage() {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    if (!listening && transcript) {
-      sendPrompt().catch((error) => {
-        console.log("Error Sending Prompt", error);
-      });
-    }
-    // including send prompt causes an infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcript, listening]);
+  
 
-  useEffect(() => {
-    setPrompt(transcript);
-  }, [transcript]);
+  
 
   return (
     <Center bg="##F6FEFD">
@@ -220,25 +211,7 @@ export default function ChatPage() {
               >
                 <i className="ri-send-plane-2-line"></i>
               </Button>
-              <Button
-                bg="#F79009"
-                size="md"
-                variant="solid"
-                borderRadius="full"
-                height={["60px", "45px"]}
-                width={["60px", "45px"]}
-                fontSize="23px"
-                shadow="xl"
-                textColor="white"
-                onClick={() => {
-                  SpeechRecognition.startListening().catch((error) => {
-                    console.log("Error With Speach Recognition", error);
-                  });
-                }}
-                isLoading={isLoading}
-              >
-                <i className="ri-mic-line"></i>
-              </Button>
+              <VoicePrompt setPrompt={setPrompt} isLoading={isLoading} sendPrompt={sendPrompt}/>
             </HStack>
           )}
         </VStack>
@@ -247,20 +220,3 @@ export default function ChatPage() {
   );
 }
 
-async function completeClaudRequest(transcript: string) {
-  const claude = new ClaudeService();
-
-  try {
-    const res = await claude.complete({
-      prompt: `\n\nHuman: ${transcript} ? Include only scientific answers less than 200 characters and do not include Here is a character response in your answer. \n\nAssistant: `,
-      model: "claude-v1",
-      max_tokens_to_sample: 300,
-      stop_sequences: ["\n\nHuman:"],
-      temperature: 0.2,
-      top_k: 0.5,
-    });
-    return res.completion;
-  } catch (error) {
-    console.log("completeClaudRequest >> error ", error);
-  }
-}
