@@ -9,6 +9,7 @@ import {
   VStack,
   Spinner,
   Grid,
+  Flex,
 } from "@chakra-ui/react";
 import { useUser } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
@@ -21,6 +22,7 @@ import SpeechRecognition, {
 import { ClaudeService } from "~/@core/services/claude/cloude-service";
 import { api } from "~/utils/api";
 import { v4 as uuidv4 } from "uuid";
+import MessageBubble from "./MessageBubble";
 
 const buttonsText = [
   "I am having a panic attack how do I calm myself down ?",
@@ -38,6 +40,7 @@ export default function ChatPage() {
   const [sessionId] = useState(uuidv4());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useUser();
+
 
   const { mutate } = api.chat.create.useMutation();
 
@@ -173,21 +176,17 @@ export default function ChatPage() {
               );
             })}
           </Grid>
-          <Box bg="white" border="1px" minW="100%" padding={5} rounded="xl">
-            <SimpleGrid spacing={3}>
+          <Box bg="white" border="1px" minW="100%" p={4} rounded="xl">
+            <Flex flexDirection="column" gap={5}>
               {messageArray.map((message, index) => (
-                <Box
+                <MessageBubble
+                  sender={index % 2 ? "Ozzy" : "User"}
+                  message={message as string}
                   key={index}
-                  textAlign={index % 2 ? "left" : "right"}
-                  bg={index % 2 ? "#23BECC1A" : "#F79009"}
-                  rounded="xl"
-                  p={3}
-                  textColor="black"
-                >
-                  {message}
-                </Box>
+                  avatarPhoto={index % 2 ? "/Ozzy.png" : `${user?.imageUrl as string}`}
+                />
               ))}
-            </SimpleGrid>
+            </Flex>
           </Box>
           <Textarea
             placeholder="You can speak or type to talk to Ozzy..."
@@ -243,7 +242,6 @@ export default function ChatPage() {
             </HStack>
           )}
         </VStack>
-        <Center></Center>
       </Box>
     </Center>
   );
