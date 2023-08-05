@@ -8,7 +8,7 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { useEffect } from "react";
 import "regenerator-runtime/runtime";
-import Footer from "~/components/footer";
+import Footer from "~/components/Footer";
 import "~/styles/font.css";
 import "~/styles/globals.css";
 import { theme } from "~/theme";
