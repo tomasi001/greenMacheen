@@ -1,4 +1,4 @@
-import { Button, ChakraProvider, Flex } from "@chakra-ui/react";
+import { Box, Button, ChakraProvider, Flex } from "@chakra-ui/react";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { type AppType } from "next/app";
 import Link from "next/link";
@@ -54,24 +54,24 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       >
         <ChakraProvider theme={theme}>
           {!regex.test(pathName) && (
-            <Flex justifyContent="space-between" p="8px">
-              <Link
-                href={
-                  router.pathname !== "/consultationHistory"
-                    ? "/consultationHistory"
-                    : "/chat"
-                }
-              >
-                <Button zIndex={2} size="md" bg={"#F79009"}>
-                  {router.pathname !== "/consultationHistory"
-                    ? "History"
-                    : "Chat"}
-                </Button>
-              </Link>
-              <div style={{ zIndex: 2 }}>
-                <UserButton afterSignOutUrl="/" />
-              </div>
-            </Flex>
+              <Flex justifyContent="space-between" p="8px">
+                <Link
+                  href={
+                    router.pathname !== "/consultationHistory"
+                      ? "/consultationHistory"
+                      : "/chat"
+                  }
+                >
+                  <Button zIndex={2} size="md" bg={"#F79009"}>
+                    {router.pathname !== "/consultationHistory"
+                      ? "History"
+                      : "Chat"}
+                  </Button>
+                </Link>
+                <Box zIndex={2}>
+                  <UserButton afterSignOutUrl="/" />
+                </Box>
+              </Flex>
           )}
           <Component {...pageProps} />
           {router.pathname === "/" && <Footer />}
